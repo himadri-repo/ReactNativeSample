@@ -35,18 +35,23 @@ export default class Login extends React.Component {
     // }
 
     componentDidMount() {
-        this._loadInitialState().done();
+        try
+        {
+            this._loadInitialState().done();
+        }
+        catch(e) {
+            alert(e);
+        }
     }
 
     _loadInitialState = async () => {
         var user = await AsyncStorage.getItem('currentuser');
-        //alert(JSON.stringify(user));
-        this.setState({username: user.username, password: user.password});
         if(user!==null) {
+            alert(JSON.stringify(user));
+            this.setState({'username': user.username, 'password': user.password});
             //this.props.navigation.prevPage = 'Login';
             this.props.navigation.navigate('Profile', {'prevPage': 'Login'});
         }
-
     };
     
     render() {
@@ -71,6 +76,7 @@ export default class Login extends React.Component {
 
     login = () => {
         //good return to profile.
+        alert(this.state.username);
         AsyncStorage.setItem('currentuser', JSON.stringify({username: this.state.username, password: this.state.password})).done();
         //alert('Done!');
         this.props.navigation.navigate('Profile', {'prevPage': 'Login'});

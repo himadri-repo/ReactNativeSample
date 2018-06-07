@@ -1,14 +1,20 @@
 {
   "expo": {
-    "name": "firstapp",
-    "version": "1.0.0",
+    "name": "First React Native App",
+    "version": "1.1.0",
     "slug": "firstapp",
     "sdkVersion": "27.0.0",
+    "orientation": "portrait",
+    "primaryColor": "#cccccc",
     "ios": {
-      "bundleIdentifier": "com.self.firstapp"
+      "supportsTablet": true,
+      "bundleIdentifier": "com.self.firstapp",
+      "buildNumber": "1"
     },
     "android": {
-      "package": "com.self.firstapp"
+      "package": "com.self.firstapp",
+      "permissions": [],
+      "versionCode": 1
     }
    }
 }

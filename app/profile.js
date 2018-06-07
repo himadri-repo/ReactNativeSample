@@ -91,11 +91,28 @@ export default class Profile extends React.Component {
         };
 
         return (
-            <View>
+            <View style={styles.container}>
                 <Text>Profile Page</Text>
+                <TouchableOpacity style={styles.btn} onPress={this.logout}><Text>Logout</Text></TouchableOpacity>
             </View>
         );
     }
+
+    async removeItemValue(key) {
+        try {
+          await AsyncStorage.removeItem(key);
+          return true;
+        }
+        catch(exception) {
+          return false;
+        }
+    }
+
+    logout = () => {
+        //good return to Login.
+        this.removeItemValue('currentuser').done();
+        this.props.navigation.navigate('Login', {'prevPage': 'Profile'});
+    };
 }
 
 const styles = StyleSheet.create({
@@ -107,8 +124,8 @@ const styles = StyleSheet.create({
       paddingLeft: 40,
       paddingRight: 40,
       backgroundColor: '#2896d3',
-      alignItems: 'center',
-      justifyContent: 'center',
+      /*alignItems: 'center',
+      justifyContent: 'center',*/
     },
     header: {
         fontSize: 24,
@@ -126,6 +143,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         backgroundColor: '#01c853',
         padding: 20,
+        width: 70,
         alignItems: 'center'
     }
   });
