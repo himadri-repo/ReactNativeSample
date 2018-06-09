@@ -1,6 +1,6 @@
 //jshint esversion:6
 import  React from 'react';
-import {StyleSheet, Text, View, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, AsyncStorage} from 'react-native';
+import {StyleSheet, Text, View, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, AsyncStorage, AppState} from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import Profile from './profile';
 
@@ -14,8 +14,20 @@ export default class Login extends React.Component {
             username: '',
             password: ''
         }
+        this.prevState = '';
+        AppState.addEventListener('change', this.requestItems);
     }
 
+    requestItems = () => {
+        console.log("Login :: " + AppState.currentState + " | Prev.State :: " + this.prevState );
+    
+        if(this.prevState==="background" && AppState.currentState==="active") {
+            this._loadInitialState().done();
+        }
+    
+        this.prevState = AppState.currentState;
+    }
+        
     getSnapshotBeforeUpdate(prevProps, prevState) {
         // this.prevProps = prevProps;
         // this.prevState = prevState;
@@ -30,6 +42,16 @@ export default class Login extends React.Component {
         //alert(JSON.stringify(mProps));
     }
 
+    componentWillUnmount() {
+        //alert('Login :: Unmount');
+        AppState.removeEventListener('change', this.requestItems);
+
+        console.log("Login: UM : " + JSON.stringify(this.props.navigation.state.params));
+        //if(this.props.state && this.props.state.params) {
+            let intension = this.props.navigation.state.params?this.props.navigation.state.params.intension:'N/A';
+            console.log("Login :: did unmount | (State: " + AppState.currentState + ") | " + intension);
+        //}
+    }
     // componentWillReceiveProps(nextProps) {
     //     //alert('hi');
     // }
@@ -37,7 +59,16 @@ export default class Login extends React.Component {
     componentDidMount() {
         try
         {
-            this._loadInitialState().done();
+            //alert('Login :: did mount');
+            console.log("Login: M : " + JSON.stringify(this.props.navigation.state.params));
+            //if(this.props.navigation.state.params && this.props.navigation.state.params) {
+                let intension = this.props.navigation.state.params?this.props.navigation.state.params.intension:'N/A';
+                console.log("Login :: did mount | (State: " + AppState.currentState + ") | " + intension);
+            //}
+           
+            if(intension.toLowerCase()!=='reset') {
+                this._loadInitialState().done();
+            }
         }
         catch(e) {
             alert(e);
@@ -46,7 +77,8 @@ export default class Login extends React.Component {
 
     _loadInitialState = async () => {
         var user = await AsyncStorage.getItem('currentuser');
-        if(user!==null) {
+        alert(JSON.stringify(user));
+        if(user) {
             alert(JSON.stringify(user));
             this.setState({'username': user.username, 'password': user.password});
             //this.props.navigation.prevPage = 'Login';
@@ -74,12 +106,15 @@ export default class Login extends React.Component {
         );
     }
 
-    login = () => {
+    login = async () => {
         //good return to profile.
-        alert(this.state.username);
-        AsyncStorage.setItem('currentuser', JSON.stringify({username: this.state.username, password: this.state.password})).done();
-        //alert('Done!');
+        alert("State Username: " + this.state.username);
+        await AsyncStorage.setItem('currentuser', JSON.stringify({username: this.state.username, password: this.state.password}));
+
+        alert("After Save: " + JSON.stringify(await AsyncStorage.getItem('currentuser')));
         this.props.navigation.navigate('Profile', {'prevPage': 'Login'});
+        //alert('Done!');
+        
     };
 }
 

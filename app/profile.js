@@ -1,19 +1,31 @@
 //jshint esversion:6
 import  React from 'react';
-import {StyleSheet, Text, View, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, AsyncStorage, BackHandler, Alert} from 'react-native';
+import {StyleSheet, Text, View, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, AsyncStorage, BackHandler, Alert } from 'react-native';
 import {StackNavigator} from 'react-navigation';
+import RNExitApp from 'react-native-exit-app';
+import {StackActions, NavigationActions} from 'react-navigation';
+
+const resetAction = StackActions.reset({
+    index: 0,
+    actions: [
+        NavigationActions.navigate({ routeName: 'Login', params: {intension: 'reset'}}),
+    ],
+    key: null 
+});
 
 export default class Profile extends React.Component {
     constructor(props) {
-        super(props);
+        super(props); 
 
         this.state = {
             userName: '',
             password: ''
         }
-
+        this.prevPage = this.props.navigation.state.params.prevPage;
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+
+        console.log("Profile : constructor");
     }
 
     // componentWillReceiveProps(nextProps, nextContext) {
@@ -24,15 +36,22 @@ export default class Profile extends React.Component {
         
     // }
 
-    // componentWillMount() {
-    //     BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
-    // }
+    componentWillMount() {
+        //BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+        //alert("Profile :: did mount");
+        //alert(this.props.navigation.state.params.prevPage);
+    }
     
+    componentDidCatch(error, errorinfo) {
+        console.log("we dis catch", error, errorinfo);
+    }
+
     componentWillUnmount() {
         BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
     
     handleBackButtonClick() {
+        console.log("Profile : handleBackButtonClick");
         if(this.prevPage.toLowerCase()=="login") {
             Alert.alert(
                 'Exit App',
@@ -42,7 +61,22 @@ export default class Profile extends React.Component {
                     style: 'cancel'
                 }, {
                     text: 'OK',
-                    onPress: () => BackHandler.exitApp()
+                    onPress: () => {
+                        //BackAndroid.exitApp();
+                        try
+                        {
+                            console.log("Profile : handleBackButtonClick : onPress");
+                            BackHandler.exitApp();
+                            this.props.navigation.dispatch(resetAction);
+                            //this.props.navigation.dispatch(resetAction);
+                            return false;
+                        }
+                        catch(e) {
+                            alert(e);
+                        }
+
+                        return true;
+                    }
                 }], 
                 {
                     cancelable: false
@@ -55,35 +89,28 @@ export default class Profile extends React.Component {
         return true;
     }
 
-    getSnapshotBeforeUpdate(prevProps, prevState) {
-        this.prevProps = prevProps;
-        this.prevState = prevState;
+    // getSnapshotBeforeUpdate(prevProps, prevState) {
+    //     this.prevProps = prevProps;
+    //     this.prevState = prevState;
 
-        //alert("getSnapshotBeforeUpdate - " + JSON.stringify(prevProps) + " - " + JSON.stringify(prevState));
+    //     //alert("getSnapshotBeforeUpdate - " + JSON.stringify(prevProps) + " - " + JSON.stringify(prevState));
 
-        return 0;
-    }
+    //     return 0;
+    // }
 
     componentDidUpdate(mProps, mState) {
         //alert("componentDidUpdate - Props: " + JSON.stringify(mProps) + "\nStates: " + JSON.stringify(mState));
 
-        this.prevPage = mProps.navigation.state.params.prevPage;
+        if(mProps.navigation.state.params!==null) {
+            this.prevPage = mProps.navigation.state.params.prevPage;
+            console.log(`Profile : componentDidUpdate : ${mProps.navigation.state.params.prevPage}`);
+        }
         //alert("prevPage : " + mProps.navigation.state.params.prevPage);
     }
 
     componentDidMount() {
-        this._loadInitialState().done();
+        console.log(`Profile : componentDidMount : ${this.props.navigation.state.params.prevPage}`);
     }
-
-    _loadInitialState = async () => {
-        var user = await AsyncStorage.getItem('currentuser');
-        
-        this.setState({username: user.username, password: user.password});
-        if(user!==null) {
-            this.props.navigation.navigate('Profile');
-        }
-
-    };
     
     render() {
         let pic = {
@@ -100,7 +127,7 @@ export default class Profile extends React.Component {
 
     async removeItemValue(key) {
         try {
-          await AsyncStorage.removeItem(key);
+          AsyncStorage.removeItem(key).done();
           return true;
         }
         catch(exception) {

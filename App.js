@@ -1,30 +1,9 @@
 //jshint esversion:6
 import React from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
-import {createStackNavigator} from 'react-navigation';
+import { StyleSheet, Text, View, Image, BackHandler, AppState } from 'react-native';
+import {createStackNavigator, StackNavigator, StackActions, NavigationActions} from 'react-navigation';
 import Login from './app/login';
 import Profile from './app/profile';
-
-// const Application = createStackNavigator({
-//   Login: {
-//     screen: Login,
-//     navigationOptions: {
-//       title: "Login",
-//       header: {
-//         visible: false,
-//       },
-//     },
-//   },
-//   Profile: {
-//     screen: Profile,
-//     navigationOptions: {
-//       title: "Profile",
-//       header: {
-//         left: null,
-//       }
-//     },
-//   }
-// });
 
 const Application = createStackNavigator(
   {
@@ -37,6 +16,7 @@ const Application = createStackNavigator(
         gesturesEnabled: false,
         headerLeft: null
       }),
+      params: {intension: ''}
     },
     Profile: {
       screen: Profile,
@@ -48,25 +28,50 @@ const Application = createStackNavigator(
         gesturesEnabled: false,
         headerLeft: null
       }),
+      params: {intension: ''}
     } 
   }, {navigationOptions: {
     title: 'This is testing',
     header: false
   }}
 );
-//   {
-//     Login: {screen: Login},
-//     Profile: {screen: Profile}
-//   }, {navigationOptions: {
-//     title: 'This is testing',
-//     header: false
-//   }}
-// );
 
 export default class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {hasError: false};
+    this.prevState = '';
+  }
+
+  componentDidCatch(error, errorinfo) {
+      this.setState({ hasError: true });
+      console.log("we did catch", error, errorinfo);
+
+      //BackHandler.exitApp();
+  }
+  
+  requestItems = () => {
+    console.log("App :: " + AppState.currentState + " | Prev.State :: " + this.prevState );
+    this.prevState = AppState.currentState;
+  }
+
+  componentWillMount() {
+    AppState.addEventListener('change', this.requestItems);
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.requestItems);
+  }
+
   render() {
-    return (
-      <Application />
-    );
+    if(!this.state.hasError) {
+      return (
+        <Application/> 
+      );
+    }
+    else {
+      return null;
+    }
   }
 }
