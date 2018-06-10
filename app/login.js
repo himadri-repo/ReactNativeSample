@@ -1,4 +1,5 @@
 //jshint esversion:6
+//jshint ignore:start
 import  React from 'react';
 import {StyleSheet, Text, View, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, AsyncStorage, AppState} from 'react-native';
 import {StackNavigator} from 'react-navigation';
@@ -149,3 +150,4 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     }
   });
+  //jshint ignore:end

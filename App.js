@@ -1,4 +1,5 @@
 //jshint esversion:6
+//jshint ignore:start
 import React from 'react';
 import { StyleSheet, Text, View, Image, BackHandler, AppState } from 'react-native';
 import {createStackNavigator, StackNavigator, StackActions, NavigationActions} from 'react-navigation';
@@ -75,3 +76,5 @@ export default class App extends React.Component {
     }
   }
 }
+
+//jshint ignore:end
